@@ -1,0 +1,34 @@
+{:itonami.blueprint/id "cloud-itonami-isic-2599"
+ :itonami.blueprint/name "Manufacture of other fabricated metal products n.e.c."
+ :itonami.blueprint/isic-rev5 "2599"
+ :itonami.blueprint/domain :other-fabricated-metal/manufacturing
+ :itonami.blueprint/license "AGPL-3.0-or-later"
+ :itonami.blueprint/social-impact [:worker-safety :materials-safety :resource-efficiency]
+ :itonami.blueprint/governor :metal-fab-plant-operations-governor
+ :itonami.blueprint/robotics true
+ :itonami.blueprint/required-technologies [:robotics :identity :forms :dmn :bpmn :audit-ledger :cae]
+ :itonami.blueprint/status :public-oss
+ :itonami.blueprint/maturity :implemented
+ :itonami.blueprint/implemented-slice
+ "MetalFabAdvisor ⊣ Metal Fabrication Plant Operations Governor,
+ langgraph-clj StateGraph, append-only audit ledger. A plant
+ OPERATIONS COORDINATION actor for a metal-fabrication shop
+ (stamping-press -> pressing-line -> wire-forming production line)
+ producing miscellaneous n.e.c. fabricated metal products (stamped/
+ pressed sheet-metal parts, wire products, metal household goods) --
+ not direct stamping/pressing-line-equipment control authority. Four
+ ops (`:log-production-batch` / `:schedule-maintenance` /
+ `:flag-safety-concern` / `:coordinate-shipment`), all `:effect
+ :propose` only. Ten concrete governor checks elaborate this
+ blueprint's four HARD invariants: propose-only effect, closed op
+ allowlist, closed proposal-effect allowlist (no direct stamping/
+ pressing-line-equipment control), permanent press-line-actuate block,
+ independent equipment verification/registration before maintenance
+ scheduling, independent batch verification/registration before
+ shipment coordination, independent shipment-weight recompute against
+ the batch's own logged weight, double-schedule guard, product-
+ category validation, and defect-rate plausibility validation.
+ Safety-concern flagging (sharp-edge/burr-laceration/press-pinch-point/
+ wire-entanglement/coating-chemical-exposure) ALWAYS escalates to a
+ human shop supervisor; `:log-production-batch` is the only op
+ eligible to auto-commit, and only at phase 3 when governor-clean."}
