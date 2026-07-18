@@ -196,3 +196,39 @@
                           :patch {:product-category :fabricated-category}} coordinator)
       (is (= 2 (count (store/ledger db)))
           "one commit + one hold, both recorded"))))
+
+;; ───────────── Additive: :handoff on :coordinate-shipment (superproject part-supplier-linkage ADR, cloud-itonami-isic-2599<->cloud-itonami-isic-2813) ─────────────
+;;
+;; isic-2599's SHIPMENT side of the superproject `:handoff` shared
+;; shape (ADR-2607177600, reused as-is) -- `:handoff` is entirely
+;; OPTIONAL on `:coordinate-shipment` (the existing `coordinate-
+;; shipment-always-needs-approval` test above that never sets it is
+;; unaffected); a `:handoff` that IS present but missing its own
+;; required identity fields HARD-holds.
+
+(deftest coordinate-shipment-with-complete-handoff-always-needs-approval-then-links-the-consumer
+  (testing "a clean shipment coordination WITH a complete :handoff still always escalates (never auto), and the handoff carries through to the SSoT on approval"
+    (let [[db actor] (fresh)
+          handoff {:handoff/id "ho-4" :handoff/source-actor "cloud-itonami-isic-2599"
+                   :handoff/batch-id "SHP-000000" :handoff/product-type-id "part:piping"
+                   :handoff/dispatched-at-iso "2026-07-18T00:00:00Z"}
+          res (exec-op actor "t15" {:op :coordinate-shipment :effect :propose :subject "ship-4"
+                                    :value {:batch-id "batch-001" :weight-kg 3000.0
+                                            :destination "buyer-yard-north" :handoff handoff}}
+                       coordinator)]
+      (is (= :interrupted (:status res)))
+      (let [r2 (approve! actor "t15")]
+        (is (= :commit (get-in r2 [:state :disposition])))
+        (is (= "cloud-itonami-isic-2599" (get-in (store/shipment db "ship-4") [:handoff :handoff/source-actor])))
+        (is (= "SHP-000000" (get-in (store/shipment db "ship-4") [:handoff :handoff/batch-id])))))))
+
+(deftest coordinate-shipment-with-incomplete-handoff-is-held
+  (testing "a :handoff that IS present but missing its own required identity fields -> HOLD, even though :handoff itself is optional"
+    (let [[db actor] (fresh)
+          res (exec-op actor "t16" {:op :coordinate-shipment :effect :propose :subject "ship-5"
+                                    :value {:batch-id "batch-001" :weight-kg 3000.0
+                                            :handoff {:handoff/source-actor "cloud-itonami-isic-2599"}}}
+                       coordinator)]
+      (is (= :hold (get-in res [:state :disposition])))
+      (is (some #{:handoff-incomplete} (-> (store/ledger db) last :basis)))
+      (is (nil? (store/shipment db "ship-5")) "no shipment committed"))))

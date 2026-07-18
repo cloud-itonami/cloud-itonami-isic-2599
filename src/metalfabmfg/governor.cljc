@@ -137,7 +137,22 @@
                                        ALWAYS set for `:flag-safety-
                                        concern`) -- escalate to a human
                                        shop supervisor. SOFT: the
-                                       human may approve."
+                                       human may approve.
+
+  Addendum (superproject part-supplier-linkage ADR, cloud-itonami-
+  isic-2599<->cloud-itonami-isic-2813): a TWELFTH HARD check,
+  `handoff-incomplete-violations`, was added alongside an OPTIONAL
+  `:handoff` field on `:coordinate-shipment` (the superproject
+  `:handoff` shared shape, ADR-2607177600, reused as-is -- no new
+  shape). `:handoff` names which downstream consumer (e.g.
+  cloud-itonami-isic-2813, sourcing `part:piping`/`part:vibration-
+  isolators` fabricated-metal components) the shipped batch is
+  destined for; unlike isic-1075's own `:coordinate-shipment` (which
+  made `:handoff` MANDATORY), this actor's `:handoff` stays OPTIONAL
+  -- a shipment with NO `:handoff` at all is NOT a violation, but a
+  `:handoff` that IS present and missing any of its own three
+  identity/correlation fields (`registry/handoff-fields-present?`)
+  HARD-holds."
   (:require [metalfabmfg.registry :as registry]
             [metalfabmfg.store :as store]))
 
@@ -282,10 +297,37 @@
         [{:rule :invalid-defect-rate
           :detail (str rr "% は物理的に妥当な不良率の範囲外")}]))))
 
+(defn- handoff-incomplete-violations
+  "For `:coordinate-shipment`, `:handoff` (the superproject `:handoff`
+  shared shape, ADR-2607177600, reused as-is) is entirely OPTIONAL --
+  a shipment with NO `:handoff` at all is NOT a violation (this shop
+  ships fabricated-metal products to any customer, tracked or not,
+  the same 'optional field absent -> not checked' discipline
+  cloud-itonami-isic-2710's own `:coordinate-shipment`-`:handoff`
+  extension uses). But a `:handoff` that IS present and missing any of
+  its own three identity/correlation fields
+  (`registry/handoff-fields-present?`) is a fabricated/incomplete
+  reference -- HARD hold, the same anti-fabrication discipline
+  `batch-not-verified-violations` above applies to a batch reference,
+  applied here to a downstream handoff reference."
+  [{:keys [op]} proposal]
+  (when (= op :coordinate-shipment)
+    (when-let [handoff (:handoff (:value proposal))]
+      (when-not (registry/handoff-fields-present? handoff)
+        [{:rule :handoff-incomplete
+          :detail "handoff参照が付与されているが必須フィールド(:handoff/id・:handoff/source-actor・:handoff/batch-id)が不足 -- 架空/不完全なhandoff参照では出荷調整できない"}]))))
+
 (defn check
   "Censors a MetalFabAdvisor proposal against the governor rules.
   Returns {:ok? bool :violations [..] :confidence c :escalate? bool
-  :high-stakes? bool :hard? bool}."
+  :high-stakes? bool :hard? bool}.
+
+  Includes `handoff-incomplete-violations` -- a TWELFTH hard check
+  added alongside the OPTIONAL `:handoff` field on `:coordinate-
+  shipment` (see ns docstring Addendum), purely additive: it only ever
+  fires for `:coordinate-shipment` proposals that carry a `:handoff`
+  map, and is a no-op for every pre-existing caller that never sets
+  `:handoff` at all."
   [request _context proposal st]
   (let [hard (into []
                    (concat (no-propose-effect-violations request)
@@ -297,7 +339,8 @@
                            (batch-not-verified-violations request proposal st)
                            (shipment-weight-exceeded-violations request proposal st)
                            (invalid-product-category-violations request proposal)
-                           (invalid-defect-rate-violations request proposal)))
+                           (invalid-defect-rate-violations request proposal)
+                           (handoff-incomplete-violations request proposal)))
         conf (:confidence proposal 0.0)
         low? (< conf confidence-floor)
         stakes? (boolean (high-stakes (:stake proposal)))
