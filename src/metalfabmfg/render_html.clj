@@ -51,10 +51,14 @@
 
   REFUSES TO LIE: `-main` throws and writes nothing when the run put no
   HARD governor hold on the ledger -- a console showing no real hold
-  would be indistinguishable from a hand-written mock.
+  would be indistinguishable from a hand-written mock -- and likewise
+  when it put no `:committed` fact there, since a governor that refuses
+  everything is no evidence of a working clean path. Both invariants are
+  enforced at BUILD time, not by convention.
 
   Usage: `clojure -M:dev:render-html [out-file]`
   (default `docs/samples/operator-console.html`)."
+  (:refer-clojure :exclude [num])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.walk :as walk]
@@ -678,9 +682,17 @@
 (defn -main [& args]
   (let [out (or (first args) "docs/samples/operator-console.html")
         {:keys [db] :as result} (run-demo!)
-        hs (hard-holds (vec (store/ledger db)))]
+        hs (hard-holds (vec (store/ledger db)))
+        cs (commits (vec (store/ledger db)))]
+    ;; A console that shows no real HARD hold is indistinguishable from a
+    ;; hand-written mock -- it proves no governor.
     (when (empty? hs)
       (throw (ex-info "no governor hold fact on the ledger — refusing to write a console that shows no real hold"
+                      {:ledger-facts (count (store/ledger db))})))
+    ;; ...and one that shows no commit at all proves no actor: a governor
+    ;; that refuses everything is not evidence of a working clean path.
+    (when (empty? cs)
+      (throw (ex-info "no :committed fact on the ledger — refusing to write a console that shows no clean path"
                       {:ledger-facts (count (store/ledger db))})))
     (let [html (render result)]
       (io/make-parents (io/file out))
