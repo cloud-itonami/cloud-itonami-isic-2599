@@ -60,7 +60,7 @@
   (default `docs/samples/operator-console.html`)."
   (:refer-clojure :exclude [num])
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [clojure.walk :as walk]
             [jp-go-dds.skin]
             [langgraph.graph :as g]
