@@ -56,7 +56,7 @@
   everything is no evidence of a working clean path. Both invariants are
   enforced at BUILD time, not by convention.
 
-  Usage: `clojure -M:dev:render-html [out-file]`
+  Usage: `kbb -M:dev:render-html [out-file]`
   (default `docs/samples/operator-console.html`)."
   (:refer-clojure :exclude [num])
   (:require [clojure.java.io :as io]
@@ -649,7 +649,7 @@
      "</header>\n"
      "<main>\n"
      "  <div class=\"banner\">\n"
-     "    <p>このページは実行時に生成される。<code>clojure -M:dev:render-html</code> が "
+     "    <p>このページは実行時に生成される。<code>kbb -M:dev:render-html</code> が "
      "<code>metalfabmfg.render-html/run-demo!</code> で実際の actor "
      "(<code>metalfabmfg.operation</code> の langgraph StateGraph → "
      "<code>metalfabmfg.governor</code> → <code>metalfabmfg.store</code>) を駆動し、"
@@ -668,7 +668,7 @@
      (ledger-section result)
      "</main>\n"
      "<footer>\n"
-     "  <p>生成: <code>clojure -M:dev:render-html</code> "
+     "  <p>生成: <code>kbb -M:dev:render-html</code> "
      "(<code>metalfabmfg.render-html</code>)。"
      "シード: <code>metalfabmfg.store/sample-data!</code>。"
      "スタイル: <code>jp-go-dds.skin/dds+skin</code>（デジタル庁デザインシステム）。"

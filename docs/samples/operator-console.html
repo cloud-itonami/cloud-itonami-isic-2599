@@ -2476,7 +2476,7 @@ img,svg { max-width: 100%; height: auto; }
 </header>
 <main>
   <div class="banner">
-    <p>このページは実行時に生成される。<code>clojure -M:dev:render-html</code> が <code>metalfabmfg.render-html/run-demo!</code> で実際の actor (<code>metalfabmfg.operation</code> の langgraph StateGraph → <code>metalfabmfg.governor</code> → <code>metalfabmfg.store</code>) を駆動し、その結果だけを描画する。HARD hold が 1 件も出なかった run では<strong>ファイルを書かずに例外を投げる</strong> —— 実際の拒否を示せないコンソールは手書きのモックと区別がつかないため。</p>
+    <p>このページは実行時に生成される。<code>kbb -M:dev:render-html</code> が <code>metalfabmfg.render-html/run-demo!</code> で実際の actor (<code>metalfabmfg.operation</code> の langgraph StateGraph → <code>metalfabmfg.governor</code> → <code>metalfabmfg.store</code>) を駆動し、その結果だけを描画する。HARD hold が 1 件も出なかった run では<strong>ファイルを書かずに例外を投げる</strong> —— 実際の拒否を示せないコンソールは手書きのモックと区別がつかないため。</p>
   </div>
   <section class="card">
     <h2>この run が実際に出した結果</h2>
@@ -2653,7 +2653,7 @@ img,svg { max-width: 100%; height: auto; }
   </section>
 </main>
 <footer>
-  <p>生成: <code>clojure -M:dev:render-html</code> (<code>metalfabmfg.render-html</code>)。シード: <code>metalfabmfg.store/sample-data!</code>。スタイル: <code>jp-go-dds.skin/dds+skin</code>（デジタル庁デザインシステム）。決定的 —— 同じシードなら 2 回の実行はバイト単位で一致する（タイムスタンプも乱数もページに載せていない）。</p>
+  <p>生成: <code>kbb -M:dev:render-html</code> (<code>metalfabmfg.render-html</code>)。シード: <code>metalfabmfg.store/sample-data!</code>。スタイル: <code>jp-go-dds.skin/dds+skin</code>（デジタル庁デザインシステム）。決定的 —— 同じシードなら 2 回の実行はバイト単位で一致する（タイムスタンプも乱数もページに載せていない）。</p>
   <p>この actor は提案しか行わない。スタンピングプレス・成形ラインの直接操作、実際の保守作業の実施、実運送業者への配車は一切行わない。</p>
 </footer>
 </body></html>
