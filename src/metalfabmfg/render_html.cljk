@@ -59,7 +59,7 @@
   Usage: `kbb -M:dev:render-html [out-file]`
   (default `docs/samples/operator-console.html`)."
   (:refer-clojure :exclude [num])
-  (:require [clojure.java.io :as io]
+  (:require [kotoba.io :as io]
             [kotoba.lang.text :as str]
             [clojure.walk :as walk]
             [jp-go-dds.skin]
