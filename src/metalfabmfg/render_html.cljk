@@ -61,7 +61,7 @@
   (:refer-clojure :exclude [num])
   (:require [kotoba.io :as io]
             [kotoba.lang.text :as str]
-            [clojure.walk :as walk]
+            [kotoba.lang.coll :as walk]
             [jp-go-dds.skin]
             [langgraph.graph :as g]
             [metalfabmfg.governor :as governor]
