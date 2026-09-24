@@ -1,5 +1,5 @@
 (ns metalfabmfg.registry-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [metalfabmfg.registry :as r]))
 
 ;; ----------------------------- equipment-verified? / equipment-registered? / equipment-ready? -----------------------------
