@@ -13,6 +13,10 @@
  ;; `metalfabmfg.render-html` to style docs/samples/operator-console.html;
  ;; the actor itself never touches it.
  :deps {
+        ;; kotoba.robotics.process: the process-physics solvers and probe this
+        ;; repo's physics.edn runs on (physical-AI bot, scripts/physical-ai-bots).
+        io.github.kotoba-lang/robotics {:local/root "../../kotoba-lang/robotics"}
+
         ;; kotoba.test (clojure.test-compatible surface), not clojure.test --
         ;; scripts/migrate-clojure-test-to-kotoba-test.cljk. Explicit floor.
         io.github.kotoba-lang/test {:git/url "https://github.com/kotoba-lang/test.git"
@@ -42,7 +46,14 @@
         io.github.kotoba-lang/langchain
         {:local/root "../../kotoba-lang/langchain"}}
  :aliases
- {;; offline workspace dev -- pin transitive langchain to local checkout
+ {
+  ;; kbb -M:physics -> the physical-AI bot's measurement: runs physics.edn on
+  ;; kotoba.robotics.process and prints one probe map. Exit 2 = could not measure.
+  :physics {:main-opts ["-m" "kotoba.robotics.process.probe"]}
+  ;; kbb -M:physai-test -> test/'s .cljk on kbb's runner (the bot's test count;
+  ;; a .kotoba vertical's own :test may refuse kbb on purpose).
+  :physai-test {:extra-paths ["test" "test-physai"] :main-opts ["-m" "cognitect.test-runner"]}
+;; offline workspace dev -- pin transitive langchain to local checkout
   ;; (kept for parity with sibling actors' deps.edn shape; redundant
   ;; with the top-level :deps override above).
   :dev {:override-deps
