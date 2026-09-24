@@ -1,0 +1,31 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:dev:physics` runs it.
+;;
+;; README: the ISIC 2599 shop stamps, presses and wire-forms sheet-metal and
+;; wire stock into miscellaneous metal goods. Its robots' physical work:
+;; incoming inspection of wire-rod coil stock by tensile test before it goes
+;; to the wire-former, and press tending -- lifting a sheet blank from the
+;; stack into the stamping die.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isic-2599"
+ :cases
+ [{:id :wire-rod-incoming-tensile
+   :kind :material
+   :procedure "tensile test of a 5 mm low-carbon wire-rod specimen cut from an incoming coil, before the coil is released to the wire-forming line"
+   :params {:length-m 0.10 :area-m2 1.9635e-5 :youngs-modulus-pa 200.0e9
+            :hardening-pa 1.0e9 :density-kg-m3 7850.0 :max-force-n 9000.0}
+   :sweep {:param :yield-stress-pa :values [180.0e6 220.0e6 260.0e6 300.0e6 340.0e6]}
+   :quantity :yield-force-n
+   :limit {:min 4500.0 :basis "estimate: ~230 MPa minimum yield over the 19.6 mm2 section, the level the formed-wire goods' spring-back and load rating were designed around"}
+   :boundary {:lo 150.0e6 :hi 400.0e6}}
+  {:id :press-tend-blank
+   :kind :manipulator
+   :procedure "press-tending arm lifts a sheet-steel blank from the destack table into the stamping die"
+   :params {:l1-m 0.55 :l2-m 0.50 :m1-kg 6.0 :m2-kg 4.0
+            :from [0.70 0.00] :to [0.30 0.60] :duration-s 1.2 :steps 400}
+   :sweep {:param :payload-kg :values [0.5 1.5 3.0 5.0 8.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 120.0 :basis "estimate: continuous shoulder torque of a ~10 kg-class press-tending arm"}
+   :boundary {:lo 0.1 :hi 40.0}}]}
